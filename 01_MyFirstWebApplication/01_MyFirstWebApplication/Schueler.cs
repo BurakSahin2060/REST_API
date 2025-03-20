@@ -4,7 +4,6 @@
     {
         public string Klasse { get; set; }
         public List<string> klassen = new List<string>();
-        DateTime Geburtstag;
 
         public void AddKlasse(string klasse)
         {
@@ -13,6 +12,7 @@
                 klassen.Add(klasse);
             }
         }
+
         public int Alter
         {
             get
@@ -22,6 +22,7 @@
             }
             set { }
         }
+
         public void ZähleSchülerProKlasse(List<Schueler> schuelerListe)
         {
             foreach (Schueler schueler in schuelerListe)
@@ -44,10 +45,9 @@
                 Console.WriteLine($"Klasse {klasse}: {anzahl} Schüler");
             }
         }
-        public Schueler(string klasse, DateTime geburttasg, string geschlecht) : base(geburttasg, geschlecht)
 
+        public Schueler(string klasse, DateTime geburtstag, string geschlecht) : base(geburtstag, geschlecht)
         {
-            Geburtstag = geburttasg;
             Klasse = klasse;
             AddKlasse(klasse);
         }
