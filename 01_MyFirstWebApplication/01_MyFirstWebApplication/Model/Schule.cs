@@ -56,7 +56,7 @@
                 if (schueler.Klasse == klasse)
                 {
                     anzahlSchueler++;
-                    if (schueler.Geschlecht == "Weiblich")
+                    if (schueler.Geschlecht == "weiblich")
                     {
                         anzahlFrauen++;
                     }
@@ -95,7 +95,7 @@
             return raum.Plaetze >= schuelerInKlasse;
         }
 
-        public string AnzahlSchülerGeschlecht
+        public string AnzahlSchuelerGeschlecht
         {
             get
             {
