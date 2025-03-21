@@ -5,7 +5,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5500") // Erlaubt Anfragen von diesem Host
+        policy.WithOrigins("http://127.0.0.1:5294") // Erlaubt Anfragen von diesem Host
               .AllowAnyMethod() // Erlaubt GET, POST, PUT, DELETE, etc.
               .AllowAnyHeader(); // Erlaubt alle Header
     });

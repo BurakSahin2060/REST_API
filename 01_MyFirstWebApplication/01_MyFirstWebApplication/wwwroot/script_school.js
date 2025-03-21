@@ -1,5 +1,5 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    const baseUrl = "http://localhost:5000"; // Passe den Port an, falls nötig (z.B. 5000, 7040, etc.)
+    const baseUrl = "http://localhost:5294";
 
     // Schüler hinzufügen
     document.getElementById("addStudentForm").addEventListener("submit", async (event) => {
