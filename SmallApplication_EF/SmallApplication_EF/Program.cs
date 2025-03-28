@@ -1,27 +1,43 @@
-﻿using System;
-
-namespace SmallApplication_EF
+﻿using SmallApplication_EF;
+using System;
+using System.Linq;
 
 class Program
 {
     static void Main(string[] args)
     {
-        using (var context = new AppDbContext())
+        using (var context = new DBContext())
         {
             context.Database.EnsureCreated();
 
-            context.People.Add(new Person { Name = "Max", Age = 17 });
-            context.People.Add(new Person { Name = "Anna", Age = 18 });
+            var person = new Person
+            {
+                FirstName = "Burak",
+                LastName = "Sahin",
+                Age = 17
+
+
+            };
+
+            var person2 = new Person
+            {
+                FirstName = "Max",
+                LastName = "Mustermann",
+                Age = 20
+            };
+
+            context.People.Add(person);
+            context.People.Add(person2);
+
             context.SaveChanges();
 
-            Console.WriteLine("Gespeicherte Personen:");
-            foreach (var person in context.People)
+            var people = context.People.ToList();
+
+            Console.WriteLine("Alle Personen in der Datenbank:");
+            foreach (var p in people)
             {
-                Console.WriteLine($"ID: {person.Id}, Name: {person.Name}, Alter: {person.Age}");
+                Console.WriteLine($"Id: {p.Id}, Name: {p.FirstName} {p.LastName}, Age: {p.Age}");
             }
         }
-
-        Console.WriteLine("Drücken Sie eine Taste zum Beenden...");
-        Console.ReadKey();
     }
 }

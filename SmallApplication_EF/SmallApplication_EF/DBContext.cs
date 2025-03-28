@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace SmallApplication_EF
 {
-    public class AppDbContext : DbContext
+    public class DBContext : DbContext
     {
         public DbSet<Person> People { get; set; }
 
@@ -11,4 +12,5 @@ namespace SmallApplication_EF
             optionsBuilder.UseSqlite("Data Source=people.db");
         }
     }
+
 }
