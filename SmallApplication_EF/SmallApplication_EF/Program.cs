@@ -1,5 +1,7 @@
-﻿using SmallApplication_EF;
+﻿using Microsoft.EntityFrameworkCore;
+using SmallApplication_EF;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 class Program
@@ -8,35 +10,70 @@ class Program
     {
         using (var context = new DBContext())
         {
+            context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
-            var person = new Person
+            bool fertig = false;
+
+            while (!fertig)
             {
-                FirstName = "Burak",
-                LastName = "Sahin",
-                Age = 17
+                Console.WriteLine("Neue Person eingeben:");
 
+                Console.Write("Vorname: ");
+                string firstName = Console.ReadLine();
 
-            };
+                Console.Write("Nachname: ");
+                string lastName = Console.ReadLine();
 
-            var person2 = new Person
+                Console.Write("Alter: ");
+                int age;
+                while (!int.TryParse(Console.ReadLine(), out age))
+                {
+                    Console.Write("Ungültige Eingabe. Bitte Zahl eingeben: ");
+                }
+
+                Console.Write("Stadt: ");
+                string cityName = Console.ReadLine();
+
+                var city = context.Cities.FirstOrDefault(c => c.Name == cityName);
+                if (city == null)
+                {
+                    city = new City { Name = cityName, People = new List<Person>() };
+                    context.Cities.Add(city);
+                    context.SaveChanges();
+                }
+
+                var person = new Person
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Age = age,
+                    CityId = city.Id
+                };
+
+                context.People.Add(person);
+                context.SaveChanges();
+
+                Console.Write("\nMöchtest du noch eine Person hinzufügen? (ja/nein): ");
+                string antwort = Console.ReadLine().Trim().ToLower();
+                if (antwort == "nein" || antwort == "n")
+                {
+                    fertig = true;
+                }
+
+                Console.WriteLine();
+            }
+
+            var cities = context.Cities.Include(c => c.People).ToList();
+
+            Console.WriteLine("\nAlle Daten in der Datenbank:");
+            foreach (var c in cities)
             {
-                FirstName = "Max",
-                LastName = "Mustermann",
-                Age = 20
-            };
-
-            context.People.Add(person);
-            context.People.Add(person2);
-
-            context.SaveChanges();
-
-            var people = context.People.ToList();
-
-            Console.WriteLine("Alle Personen in der Datenbank:");
-            foreach (var p in people)
-            {
-                Console.WriteLine($"Id: {p.Id}, Name: {p.FirstName} {p.LastName}, Age: {p.Age}");
+                Console.WriteLine($"Stadt: {c.Name}");
+                foreach (var p in c.People)
+                {
+                    Console.WriteLine($"- {p.FirstName} {p.LastName}, Alter: {p.Age}");
+                }
             }
         }
     }
