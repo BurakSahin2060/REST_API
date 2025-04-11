@@ -4,122 +4,85 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-class Program
+namespace SmallApplication_EF
 {
-    static async Task Main(string[] args)
+    class Program
     {
-        var optionsBuilder = new DbContextOptionsBuilder<DBContext>();
-        optionsBuilder.UseSqlite("Data Source=people.db");
-
-        using (var context = new DBContext(optionsBuilder.Options))
+        public static void Main(string[] args)
         {
-            // Datenbank initialisieren
-            await context.Database.EnsureCreatedAsync();
-
-            bool fertig = false;
-
-            while (!fertig)
+            using (var context = new DBContext())
             {
-                try
+                context.Database.Migrate();
+
+                var city = context.Cities.Include(c => c.Persons).FirstOrDefault();
+                if (city == null)
                 {
-                    Console.WriteLine("Neue Person eingeben:");
+                    Console.WriteLine("Neue Stadt anlegen:");
+                    Console.Write("Name der Stadt: ");
+                    string cityName = Console.ReadLine() ?? "Unbekannt";
+                    city = new City { Name = cityName };
+                    context.Cities.Add(city);
+                    context.SaveChanges();
+                }
 
-                    Console.Write("Vorname: ");
-                    string firstName = Console.ReadLine()?.Trim();
-                    if (string.IsNullOrWhiteSpace(firstName))
+                Console.WriteLine($"Gespeicherte Personen in {city.Name}:");
+                if (city.Persons.Any())
+                {
+                    foreach (var person in city.Persons)
                     {
-                        Console.WriteLine("Vorname darf nicht leer sein.");
+                        Console.WriteLine($"  - ID: {person.Id}, Name: {person.Name}, PLZ: {person.PLZ}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("  - Keine Personen vorhanden.");
+                }
+
+                Console.WriteLine("\nNeue Person hinzufügen (Name eingeben, 'exit' zum Beenden):");
+                string? name = Console.ReadLine();
+
+                while (name?.ToLower() != "exit")
+                {
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        Console.WriteLine("Fehler: Name darf nicht leer sein.");
+                        name = Console.ReadLine();
                         continue;
                     }
 
-                    Console.Write("Nachname: ");
-                    string lastName = Console.ReadLine()?.Trim();
-                    if (string.IsNullOrWhiteSpace(lastName))
+                    string? plz = null;
+                    bool validPlz = false;
+                    while (!validPlz)
                     {
-                        Console.WriteLine("Nachname darf nicht leer sein.");
-                        continue;
+                        Console.WriteLine("Postleitzahl eingeben:");
+                        plz = Console.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(plz))
+                        {
+                            Console.WriteLine("Fehler: PLZ darf nicht leer sein.");
+                        }
+                        else
+                        {
+                            validPlz = true;
+                        }
                     }
 
-                    Console.Write("Alter: ");
-                    if (!int.TryParse(Console.ReadLine(), out int age) || age < 0)
+                    var newPerson = new Person
                     {
-                        Console.WriteLine("Ungültiges Alter. Bitte eine positive Zahl eingeben.");
-                        continue;
-                    }
-
-                    Console.Write("Stadt: ");
-                    string cityName = Console.ReadLine()?.Trim();
-                    if (string.IsNullOrWhiteSpace(cityName))
-                    {
-                        Console.WriteLine("Stadtname darf nicht leer sein.");
-                        continue;
-                    }
-
-                    // Case-insensitive Suche
-                    var city = await context.Cities
-                        .FirstOrDefaultAsync(c => c.Name.ToLower() == cityName.ToLower());
-
-                    if (city == null)
-                    {
-                        city = new City { Name = cityName };
-                        context.Cities.Add(city);
-                    }
-
-                    var person = new Person
-                    {
-                        FirstName = firstName,
-                        LastName = lastName,
-                        Age = age,
+                        Name = name,
+                        PLZ = plz,
                         City = city
                     };
 
-                    context.People.Add(person);
-                    await context.SaveChangesAsync(); // Einmaliges Speichern
+                    city.Persons.Add(newPerson);
+                    context.SaveChanges();
 
-                    Console.Write("\nMöchtest du noch eine Person hinzufügen? (ja/nein): ");
-                    string antwort = Console.ReadLine()?.Trim().ToLower();
-                    if (antwort == "nein" || antwort == "n")
-                    {
-                        fertig = true;
-                    }
-
-                    Console.WriteLine();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Ein Fehler ist aufgetreten: {ex.Message}");
+                    Console.WriteLine("Person gespeichert! Nächste Person (oder 'exit'):");
+                    name = Console.ReadLine();
                 }
             }
 
-            // Daten anzeigen
-            var cities = await context.Cities
-                .Include(c => c.People)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-
-            Console.WriteLine("\nAlle Daten in der Datenbank:");
-            if (cities.Count == 0)
-            {
-                Console.WriteLine("Keine Daten vorhanden.");
-            }
-            else
-            {
-                foreach (var c in cities)
-                {
-                    Console.WriteLine($"Stadt: {c.Name}");
-                    if (c.People.Count == 0)
-                    {
-                        Console.WriteLine("- Keine Personen in dieser Stadt.");
-                    }
-                    else
-                    {
-                        foreach (var p in c.People.OrderBy(p => p.LastName))
-                        {
-                            Console.WriteLine($"- {p.FirstName} {p.LastName}, Alter: {p.Age}");
-                        }
-                    }
-                }
-            }
+            Console.WriteLine("Programm beendet.");
         }
     }
 }
