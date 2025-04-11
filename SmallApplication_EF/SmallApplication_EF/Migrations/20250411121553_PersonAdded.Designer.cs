@@ -10,8 +10,8 @@ using SmallApplication_EF;
 namespace SmallApplication_EF.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20250411120708_AddedPerson")]
-    partial class AddedPerson
+    [Migration("20250411121553_PersonAdded")]
+    partial class PersonAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,6 @@ namespace SmallApplication_EF.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

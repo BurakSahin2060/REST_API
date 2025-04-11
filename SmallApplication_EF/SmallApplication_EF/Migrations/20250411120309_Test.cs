@@ -61,7 +61,7 @@ namespace SmallApplication_EF.Migrations
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Persons_Cities_CityId",
-                table: "Persons",
+                table: "Persons", 
                 column: "CityId",
                 principalTable: "Cities",
                 principalColumn: "Id",
