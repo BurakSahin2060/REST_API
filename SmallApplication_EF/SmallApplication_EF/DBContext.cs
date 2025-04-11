@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace SmallApplication_EF
 {
@@ -8,9 +7,16 @@ namespace SmallApplication_EF
         public DbSet<Person> People { get; set; }
         public DbSet<City> Cities { get; set; }
 
+        public DBContext(DbContextOptions<DBContext> options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=people.db");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=people.db");
+            }
         }
     }
 }
