@@ -1,27 +1,88 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using SmallApplication_EF;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SmallApplication_EF
-
-class Program
 {
-    static void Main(string[] args)
+    class Program
     {
-        using (var context = new AppDbContext())
+        public static void Main(string[] args)
         {
-            context.Database.EnsureCreated();
-
-            context.People.Add(new Person { Name = "Max", Age = 17 });
-            context.People.Add(new Person { Name = "Anna", Age = 18 });
-            context.SaveChanges();
-
-            Console.WriteLine("Gespeicherte Personen:");
-            foreach (var person in context.People)
+            using (var context = new DBContext())
             {
-                Console.WriteLine($"ID: {person.Id}, Name: {person.Name}, Alter: {person.Age}");
-            }
-        }
+                context.Database.Migrate();
 
-        Console.WriteLine("Drücken Sie eine Taste zum Beenden...");
-        Console.ReadKey();
+                var city = context.Cities.Include(c => c.Persons).FirstOrDefault();
+                if (city == null)
+                {
+                    Console.WriteLine("Neue Stadt anlegen:");
+                    Console.Write("Name der Stadt: ");
+                    string cityName = Console.ReadLine() ?? "Unbekannt";
+                    city = new City { Name = cityName };
+                    context.Cities.Add(city);
+                    context.SaveChanges();
+                }
+
+                Console.WriteLine($"Gespeicherte Personen in {city.Name}:");
+                if (city.Persons.Any())
+                {
+                    foreach (var person in city.Persons)
+                    {
+                        Console.WriteLine($"  - ID: {person.Id}, Name: {person.Name}, PLZ: {person.PLZ}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("  - Keine Personen vorhanden.");
+                }
+
+                Console.WriteLine("\nNeue Person hinzufügen (Name eingeben, 'exit' zum Beenden):");
+                string? name = Console.ReadLine();
+
+                while (name?.ToLower() != "exit")
+                {
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        Console.WriteLine("Fehler: Name darf nicht leer sein.");
+                        name = Console.ReadLine();
+                        continue;
+                    }
+
+                    string? plz = null;
+                    bool validPlz = false;
+                    while (!validPlz)
+                    {
+                        Console.WriteLine("Postleitzahl eingeben:");
+                        plz = Console.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(plz))
+                        {
+                            Console.WriteLine("Fehler: PLZ darf nicht leer sein.");
+                        }
+                        else
+                        {
+                            validPlz = true;
+                        }
+                    }
+
+                    var newPerson = new Person
+                    {
+                        Name = name,
+                        PLZ = plz,
+                        City = city
+                    };
+
+                    city.Persons.Add(newPerson);
+                    context.SaveChanges();
+
+                    Console.WriteLine("Person gespeichert! Nächste Person (oder 'exit'):");
+                    name = Console.ReadLine();
+                }
+            }
+
+            Console.WriteLine("Programm beendet.");
+        }
     }
 }
