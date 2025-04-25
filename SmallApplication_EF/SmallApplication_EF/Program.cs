@@ -82,7 +82,7 @@ namespace SmallApplication_EF
                 }
             }
 
-            Console.WriteLine("Programm beendet.");
+            Console.WriteLine("Programm beendet!");
         }
     }
 }
